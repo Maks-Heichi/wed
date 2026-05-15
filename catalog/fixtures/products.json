@@ -1,0 +1,41 @@
+[
+  {
+    "model": "catalog.product",
+    "pk": 1,
+    "fields": {
+      "name": "Удобный сервис рассылок",
+      "description": "Неограниченная лицензия, поддержка, установка на сервер",
+      "image": null,
+      "category": 1,
+      "price": "140.00",
+      "created_at": "2026-05-15T10:00:00Z",
+      "updated_at": "2026-05-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.product",
+    "pk": 2,
+    "fields": {
+      "name": "Бот для уведомлений",
+      "description": "Telegram-бот с рассылкой статусов заказов",
+      "image": null,
+      "category": 2,
+      "price": "99.00",
+      "created_at": "2026-05-15T10:00:00Z",
+      "updated_at": "2026-05-15T10:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.product",
+    "pk": 3,
+    "fields": {
+      "name": "Пакет микросервисов",
+      "description": "Набор шаблонов для быстрого старта API",
+      "image": null,
+      "category": 3,
+      "price": "250.00",
+      "created_at": "2026-05-15T10:00:00Z",
+      "updated_at": "2026-05-15T10:00:00Z"
+    }
+  }
+]

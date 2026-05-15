@@ -1,0 +1,26 @@
+[
+  {
+    "model": "catalog.category",
+    "pk": 1,
+    "fields": {
+      "name": "Рассылки",
+      "description": "Сервисы и плагины для email-рассылок"
+    }
+  },
+  {
+    "model": "catalog.category",
+    "pk": 2,
+    "fields": {
+      "name": "Телеграм боты",
+      "description": "Готовые боты и шаблоны для Telegram"
+    }
+  },
+  {
+    "model": "catalog.category",
+    "pk": 3,
+    "fields": {
+      "name": "Полезные утилиты",
+      "description": "Скрипты и утилиты для разработки"
+    }
+  }
+]
