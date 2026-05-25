@@ -1,0 +1,40 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}{{ product.name }} — Skystore{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <a href="{% url 'catalog:home' %}" class="btn btn-link ps-0 mb-3">&larr; Назад в каталог</a>
+
+    <div class="row g-4">
+        <div class="col-md-5">
+            {% if product.image %}
+            <img
+                src="{{ product.image.url }}"
+                class="img-fluid rounded shadow"
+                alt="{{ product.name }}"
+            >
+            {% else %}
+            <div class="bg-secondary text-white text-center rounded py-5">
+                Изображение отсутствует
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-md-7">
+            <h1 class="display-5">{{ product.name }}</h1>
+            <p class="lead text-muted">{{ product.category.name }}</p>
+            <p class="fs-4 fw-bold">{{ product.price }} ₽</p>
+            <hr>
+            <h2 class="h5">Описание</h2>
+            <p>{{ product.description }}</p>
+            <hr>
+            <dl class="row small text-muted mb-0">
+                <dt class="col-sm-4">Дата создания</dt>
+                <dd class="col-sm-8">{{ product.created_at|date:"d.m.Y H:i" }}</dd>
+                <dt class="col-sm-4">Последнее изменение</dt>
+                <dd class="col-sm-8">{{ product.updated_at|date:"d.m.Y H:i" }}</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+{% endblock %}
