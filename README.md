@@ -1,6 +1,6 @@
 # Django Catalog Project
 
-Учебный проект на Django с приложением `catalog`.
+Учебный проект на Django с приложениями `catalog` и `blog`.
 
 ## Что реализовано
 
@@ -11,15 +11,60 @@
 - добавлены Bootstrap-шаблоны `home.html` и `contacts.html`;
 - подключена PostgreSQL, параметры БД вынесены в `.env`;
 - добавлены модели `Category` и `Product`, миграции и админка;
-- подготовлены фикстуры и команда `load_test_products`.
+- подготовлены фикстуры и команда `load_test_products`;
+- на главной странице выводится список товаров через `Product.objects.all()` и цикл в шаблоне;
+- описание товара на главной обрезается до первых 100 символов;
+- добавлен контроллер `product_detail`: товар извлекается по `pk` через ORM и передаётся в шаблон;
+- добавлена страница товара `product_detail.html` (название, описание, цена, изображение, категория, даты);
+- реализованы переходы с главной на карточку товара и обратно;
+- выделен базовый шаблон `base.html` (шапка, подвал, Bootstrap, блоки `title` и `content`);
+- создан подшаблон `includes/menu.html`, подключается во все страницы каталога;
+- шаблоны `home.html`, `product_detail.html` и `contacts.html` наследуют `base.html`;
+- добавлена модель `ContactMessage`, форма `ContactForm` с валидацией и сохранением в БД;
+- сообщения формы отображаются в админ-панели;
+- контроллеры приложения `catalog` переведены на CBV: `ProductListView`, `ProductDetailView`, `ContactView`;
+- для главной страницы используется `ListView` с `Product.objects.all()`;
+- для страницы товара используется `DetailView` с получением объекта по `pk`;
+- для страницы контактов используется `View` с методами `get` и `post`;
+- создано приложение `blog`, зарегистрировано в `INSTALLED_APPS`;
+- добавлен файл `blog/urls.py`, маршруты подключены через `include` с префиксом `blogs/`;
+- добавлена модель `BlogPost` с полями: заголовок, содержимое, превью, дата создания, признак публикации, количество просмотров;
+- в модели `BlogPost` описаны `Meta`, `verbose_name`, `verbose_name_plural` и метод `__str__`;
+- для блога реализован полный CRUD на CBV: `BlogPostListView`, `BlogPostDetailView`, `BlogPostCreateView`, `BlogPostUpdateView`, `BlogPostDeleteView`;
+- добавлена форма `BlogPostForm` для создания и редактирования записей;
+- блоговые записи зарегистрированы в админ-панели (`BlogPostAdmin`);
+- шаблоны блога наследуют `base.html` и используют главное меню через `includes/menu.html`;
+- в `BlogPostListView.get_queryset()` выводятся только опубликованные записи;
+- в `BlogPostDetailView.get_object()` увеличивается счётчик просмотров;
+- в `BlogPostUpdateView` через `success_url` после редактирования выполняется переход на страницу статьи.
 
 ## Страницы
 
-- `/` и `/home/` — главная страница;
-- `/contacts/` — страница контактов;
+- `/` и `/home/` — главная страница со списком товаров;
+- `/products/<id>/` — подробная информация о товаре (`product_detail`);
+- `/contacts/` — страница контактов с формой обратной связи;
+- `/blogs/` — список опубликованных статей (`blog:list`);
+- `/blogs/create/` — создание статьи (`blog:create`);
+- `/blogs/<id>/` — просмотр статьи (`blog:detail`);
+- `/blogs/<id>/update/` — редактирование статьи (`blog:update`);
+- `/blogs/<id>/delete/` — удаление статьи (`blog:delete`);
 - `/admin/` — административная панель.
 
 Все URL-адреса заканчиваются на `/`.
+
+## Шаблоны
+
+- `templates/catalog/base.html` — общий каркас страницы;
+- `templates/catalog/includes/menu.html` — главное меню;
+- `templates/catalog/home.html` — каталог товаров;
+- `templates/catalog/product_detail.html` — карточка товара;
+- `templates/catalog/contacts.html` — контакты и форма;
+- `templates/blog/blogpost_list.html` — список статей;
+- `templates/blog/blogpost_detail.html` — просмотр статьи;
+- `templates/blog/blogpost_form.html` — форма создания и редактирования;
+- `templates/blog/blogpost_confirm_delete.html` — подтверждение удаления.
+
+Медиафайлы (изображения товаров и превью статей) отдаются в режиме `DEBUG` по адресу `/media/`.
 
 ## База данных
 
@@ -44,6 +89,15 @@
    - `python manage.py runserver`
 
 После запуска проект доступен по адресу: `http://127.0.0.1:8000/`.
+
+Примеры страниц:
+
+- `http://127.0.0.1:8000/` — список товаров;
+- `http://127.0.0.1:8000/products/1/` — товар с идентификатором 1;
+- `http://127.0.0.1:8000/blogs/` — список статей;
+- `http://127.0.0.1:8000/blogs/create/` — создание статьи.
+
+Для работы каталога и блога используйте `python manage.py runserver`, а не `python main.py` (старый HTTP-сервер без маршрутов `/products/` и `/blogs/`).
 
 ## Фикстуры и команды
 
