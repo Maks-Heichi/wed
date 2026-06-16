@@ -1,4 +1,4 @@
-# Django Catalog Project
+# Проект каталога на Django
 
 Учебный проект на Django с приложениями `catalog` и `blog`.
 
@@ -36,12 +36,20 @@
 - шаблоны блога наследуют `base.html` и используют главное меню через `includes/menu.html`;
 - в `BlogPostListView.get_queryset()` выводятся только опубликованные записи;
 - в `BlogPostDetailView.get_object()` увеличивается счётчик просмотров;
-- в `BlogPostUpdateView` через `success_url` после редактирования выполняется переход на страницу статьи.
+- в `BlogPostUpdateView` через `success_url` после редактирования выполняется переход на страницу статьи;
+- реализован CRUD для продуктов через `ProductForm` (`ProductCreateView`, `ProductUpdateView`, `ProductDeleteView`);
+- список запрещённых слов вынесен в константу `FORBIDDEN_WORDS`, валидация в `clean_name` и `clean_description` (регистр игнорируется);
+- в `clean_price` проверяется, что цена не может быть отрицательной;
+- стилизация полей формы продуктов выполняется в методе `__init__` (`form-control`, `form-check-input`);
+- в `clean_image` проверяются формат (JPEG/PNG) и размер загружаемого файла (не более 5 МБ).
 
 ## Страницы
 
 - `/` и `/home/` — главная страница со списком товаров;
+- `/products/create/` — создание продукта;
 - `/products/<id>/` — подробная информация о товаре (`product_detail`);
+- `/products/<id>/update/` — редактирование продукта;
+- `/products/<id>/delete/` — удаление продукта;
 - `/contacts/` — страница контактов с формой обратной связи;
 - `/blogs/` — список опубликованных статей (`blog:list`);
 - `/blogs/create/` — создание статьи (`blog:create`);

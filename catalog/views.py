@@ -2,10 +2,17 @@
 
 from django.contrib import messages
 from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
 from django.views import View
-from django.views.generic import DetailView, ListView
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    UpdateView,
+)
 
-from catalog.forms import ContactForm
+from catalog.forms import ContactForm, ProductForm
 from catalog.models import Product
 
 
@@ -27,6 +34,37 @@ class ProductDetailView(DetailView):
     model = Product
     template_name = "catalog/product_detail.html"
     context_object_name = "product"
+
+
+class ProductCreateView(CreateView):
+    """Создаёт новый продукт."""
+
+    model = Product
+    form_class = ProductForm
+    template_name = "catalog/product_form.html"
+    success_url = reverse_lazy("catalog:home")
+
+
+class ProductUpdateView(UpdateView):
+    """Редактирует существующий продукт."""
+
+    model = Product
+    form_class = ProductForm
+    template_name = "catalog/product_form.html"
+
+    def form_valid(self, form):
+        """Сохраняет продукт и перенаправляет на страницу товара."""
+        self.object = form.save()
+        self.success_url = reverse("catalog:product_detail", kwargs={"pk": self.object.pk})
+        return super().form_valid(form)
+
+
+class ProductDeleteView(DeleteView):
+    """Удаляет продукт."""
+
+    model = Product
+    template_name = "catalog/product_confirm_delete.html"
+    success_url = reverse_lazy("catalog:home")
 
 
 class ContactView(View):
