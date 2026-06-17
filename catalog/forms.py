@@ -1,20 +1,9 @@
 """Формы приложения catalog."""
 
 from django import forms
+from django.conf import settings
 
 from catalog.models import Product
-
-FORBIDDEN_WORDS = (
-    "казино",
-    "криптовалюта",
-    "крипта",
-    "биржа",
-    "дешево",
-    "бесплатно",
-    "обман",
-    "полиция",
-    "радар",
-)
 
 ALLOWED_IMAGE_FORMATS = ("image/jpeg", "image/png")
 MAX_IMAGE_SIZE = 5 * 1024 * 1024
@@ -41,7 +30,7 @@ class ProductForm(forms.ModelForm):
     def _validate_forbidden_words(self, value: str, field_label: str) -> str:
         """Проверяет отсутствие запрещённых слов в тексте поля."""
         lower_value = value.lower()
-        for word in FORBIDDEN_WORDS:
+        for word in settings.FORBIDDEN_WORDS:
             if word in lower_value:
                 raise forms.ValidationError(
                     f"В поле «{field_label}» запрещено использовать слово «{word}»."

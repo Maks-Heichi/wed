@@ -38,7 +38,7 @@
 - в `BlogPostDetailView.get_object()` увеличивается счётчик просмотров;
 - в `BlogPostUpdateView` через `success_url` после редактирования выполняется переход на страницу статьи;
 - реализован CRUD для продуктов через `ProductForm` (`ProductCreateView`, `ProductUpdateView`, `ProductDeleteView`);
-- список запрещённых слов вынесен в константу `FORBIDDEN_WORDS`, валидация в `clean_name` и `clean_description` (регистр игнорируется);
+- список запрещённых слов вынесен в настройки `FORBIDDEN_WORDS` в `config/settings.py`, валидация в `clean_name` и `clean_description` (регистр игнорируется);
 - в `clean_price` проверяется, что цена не может быть отрицательной;
 - стилизация полей формы продуктов выполняется в методе `__init__` (`form-control`, `form-check-input`);
 - в `clean_image` проверяются формат (JPEG/PNG) и размер загружаемого файла (не более 5 МБ).
