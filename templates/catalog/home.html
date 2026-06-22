@@ -12,9 +12,11 @@
 </div>
 
 <div class="container mb-5">
+    {% if user.is_authenticated %}
     <div class="mb-4">
         <a href="{% url 'catalog:product_create' %}" class="btn btn-primary">Добавить продукт</a>
     </div>
+    {% endif %}
 
     <div class="row text-center">
         {% for product in products %}
@@ -31,12 +33,21 @@
                         {{ product.description|slice:":100" }}{% if product.description|length > 100 %}...{% endif %}
                     </p>
                     <p class="h3">{{ product.price }} ₽</p>
+                    {% if user.is_authenticated %}
                     <a
                         href="{% url 'catalog:product_detail' product.pk %}"
                         class="btn btn-lg btn-outline-primary mt-auto"
                     >
                         Подробнее
                     </a>
+                    {% else %}
+                    <a
+                        href="{% url 'users:login' %}?next={% url 'catalog:product_detail' product.pk %}"
+                        class="btn btn-lg btn-outline-secondary mt-auto"
+                    >
+                        Войти, чтобы посмотреть
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

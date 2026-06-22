@@ -1,6 +1,6 @@
 # Проект каталога на Django
 
-Учебный проект на Django с приложениями `catalog` и `blog`.
+Учебный проект на Django с приложениями `catalog`, `blog` и `users`.
 
 ## Что реализовано
 
@@ -41,15 +41,29 @@
 - список запрещённых слов вынесен в настройки `FORBIDDEN_WORDS` в `config/settings.py`, валидация в `clean_name` и `clean_description` (регистр игнорируется);
 - в `clean_price` проверяется, что цена не может быть отрицательной;
 - стилизация полей формы продуктов выполняется в методе `__init__` (`form-control`, `form-check-input`);
-- в `clean_image` проверяются формат (JPEG/PNG) и размер загружаемого файла (не более 5 МБ).
+- в `clean_image` проверяются формат (JPEG/PNG) и размер загружаемого файла (не более 5 МБ);
+- создано приложение `users`, зарегистрировано в `INSTALLED_APPS`;
+- модель `User` наследуется от `AbstractUser`, `USERNAME_FIELD = "email"`;
+- в модели пользователя добавлены поля: аватар, номер телефона, страна;
+- настроена кастомная модель пользователя через `AUTH_USER_MODEL = "users.User"`;
+- реализована регистрация (`UserRegisterForm`, `RegisterView`) с подтверждением пароля;
+- после регистрации отправляется приветственное письмо через SMTP (`send_mail`);
+- реализована авторизация по email и паролю (`UserLoginForm`, `UserLoginView`);
+- настроены `LOGIN_URL`, `LOGIN_REDIRECT_URL`, `LOGOUT_REDIRECT_URL`;
+- доступ к просмотру, созданию, изменению и удалению продуктов закрыт через `LoginRequiredMixin`;
+- список товаров на главной странице доступен всем пользователям, включая анонимных;
+- в меню добавлены ссылки «Войти», «Регистрация» и «Выйти».
 
 ## Страницы
 
-- `/` и `/home/` — главная страница со списком товаров;
-- `/products/create/` — создание продукта;
-- `/products/<id>/` — подробная информация о товаре (`product_detail`);
-- `/products/<id>/update/` — редактирование продукта;
-- `/products/<id>/delete/` — удаление продукта;
+- `/` и `/home/` — главная страница со списком товаров (доступна всем);
+- `/products/create/` — создание продукта (только для авторизованных);
+- `/products/<id>/` — подробная информация о товаре (только для авторизованных);
+- `/products/<id>/update/` — редактирование продукта (только для авторизованных);
+- `/products/<id>/delete/` — удаление продукта (только для авторизованных);
+- `/users/register/` — регистрация пользователя;
+- `/users/login/` — авторизация пользователя;
+- `/users/logout/` — выход из системы;
 - `/contacts/` — страница контактов с формой обратной связи;
 - `/blogs/` — список опубликованных статей (`blog:list`);
 - `/blogs/create/` — создание статьи (`blog:create`);
@@ -70,7 +84,9 @@
 - `templates/blog/blogpost_list.html` — список статей;
 - `templates/blog/blogpost_detail.html` — просмотр статьи;
 - `templates/blog/blogpost_form.html` — форма создания и редактирования;
-- `templates/blog/blogpost_confirm_delete.html` — подтверждение удаления.
+- `templates/blog/blogpost_confirm_delete.html` — подтверждение удаления;
+- `templates/users/register.html` — регистрация пользователя;
+- `templates/users/login.html` — авторизация пользователя.
 
 Медиафайлы (изображения товаров и превью статей) отдаются в режиме `DEBUG` по адресу `/media/`.
 
@@ -78,9 +94,11 @@
 
 1. Скопировать шаблон окружения:
    - `copy .env.example .env` (Windows) или `cp .env.example .env` (Linux/macOS)
-2. Указать в `.env` параметры PostgreSQL.
+2. Указать в `.env` параметры PostgreSQL и почты (`EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`).
 3. Создать пользователя и базу в pgAdmin или выполнить `scripts/init_postgres.sql`.
 4. При ошибке доступа к схеме `public` — `scripts/fix_public_schema.sql`.
+5. После подключения кастомной модели пользователя (`AUTH_USER_MODEL`) при необходимости пересоздайте базу данных и выполните миграции заново:
+   - `python manage.py migrate`
 
 ## Запуск проекта
 
@@ -92,7 +110,7 @@
 4. Загрузить тестовые данные (опционально):
    - `python manage.py load_test_products`
 5. Создать суперпользователя:
-   - `python manage.py createsuperuser`
+   - `python manage.py createsuperuser` (в качестве логина укажите email)
 6. Запустить сервер:
    - `python manage.py runserver`
 
