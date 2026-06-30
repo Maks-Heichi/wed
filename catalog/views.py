@@ -1,8 +1,8 @@
 """Контроллеры приложения catalog."""
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import (
@@ -15,18 +15,28 @@ from django.views.generic import (
 
 from catalog.forms import ContactForm, ProductForm
 from catalog.models import Product
+from catalog.permissions import user_can_edit_product
+
+
+class ProductOwnerOrModeratorMixin(UserPassesTestMixin):
+    """Разрешает доступ владельцу продукта или модератору."""
+
+    def test_func(self):
+        """Проверяет права текущего пользователя на продукт."""
+        product = self.get_object()
+        return user_can_edit_product(self.request.user, product)
 
 
 class ProductListView(ListView):
-    """Отображает главную страницу со списком товаров."""
+    """Отображает главную страницу со списком опубликованных товаров."""
 
     model = Product
     template_name = "catalog/home.html"
     context_object_name = "products"
 
     def get_queryset(self):
-        """Возвращает все товары каталога."""
-        return Product.objects.all()
+        """Возвращает только опубликованные товары."""
+        return Product.objects.filter(is_published=True)
 
 
 class ProductDetailView(LoginRequiredMixin, DetailView):
@@ -36,36 +46,88 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
     template_name = "catalog/product_detail.html"
     context_object_name = "product"
 
+    def get_queryset(self):
+        """Возвращает товары, доступные текущему пользователю."""
+        user = self.request.user
+        if user.has_perm("catalog.delete_product"):
+            return Product.objects.all()
+        queryset = Product.objects.filter(is_published=True)
+        if user.is_authenticated:
+            queryset = queryset | Product.objects.filter(owner=user)
+        return queryset.distinct()
+
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
-    """Создаёт новый продукт."""
+    """Создаёт новый продукт и привязывает его к текущему пользователю."""
 
     model = Product
     form_class = ProductForm
     template_name = "catalog/product_form.html"
     success_url = reverse_lazy("catalog:home")
 
+    def get_form_kwargs(self):
+        """Передаёт текущего пользователя в форму."""
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
-class ProductUpdateView(LoginRequiredMixin, UpdateView):
-    """Редактирует существующий продукт."""
+    def form_valid(self, form):
+        """Сохраняет продукт с владельцем — текущим пользователем."""
+        form.instance.owner = self.request.user
+        messages.success(self.request, "Продукт успешно создан.")
+        return super().form_valid(form)
+
+
+class ProductUpdateView(LoginRequiredMixin, ProductOwnerOrModeratorMixin, UpdateView):
+    """Редактирует продукт, если пользователь является владельцем или модератором."""
 
     model = Product
     form_class = ProductForm
     template_name = "catalog/product_form.html"
+
+    def get_form_kwargs(self):
+        """Передаёт текущего пользователя в форму."""
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        return kwargs
 
     def form_valid(self, form):
         """Сохраняет продукт и перенаправляет на страницу товара."""
         self.object = form.save()
         self.success_url = reverse("catalog:product_detail", kwargs={"pk": self.object.pk})
+        messages.success(self.request, "Продукт успешно обновлён.")
         return super().form_valid(form)
 
 
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
-    """Удаляет продукт."""
+class ProductDeleteView(LoginRequiredMixin, ProductOwnerOrModeratorMixin, DeleteView):
+    """Удаляет продукт, если пользователь является владельцем или модератором."""
 
     model = Product
     template_name = "catalog/product_confirm_delete.html"
     success_url = reverse_lazy("catalog:home")
+
+    def delete(self, request, *args, **kwargs):
+        """Удаляет продукт после успешной проверки прав."""
+        messages.success(self.request, "Продукт удалён.")
+        return super().delete(request, *args, **kwargs)
+
+
+class ProductUnpublishView(LoginRequiredMixin, PermissionRequiredMixin, View):
+    """Отменяет публикацию продукта для пользователей с соответствующим правом."""
+
+    permission_required = "catalog.can_unpublish_product"
+
+    def post(self, request, pk):
+        """Снимает продукт с публикации."""
+        product = get_object_or_404(Product, pk=pk)
+        if not product.is_published:
+            messages.info(request, "Продукт уже не опубликован.")
+            return redirect("catalog:home")
+
+        product.is_published = False
+        product.save(update_fields=["is_published"])
+        messages.success(request, "Публикация продукта отменена.")
+        return redirect("catalog:home")
 
 
 class ContactView(View):

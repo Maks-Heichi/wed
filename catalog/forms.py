@@ -14,10 +14,11 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ("name", "description", "image", "category", "price")
+        fields = ("name", "description", "image", "category", "price", "is_published")
 
-    def __init__(self, *args, **kwargs):
-        """Добавляет Bootstrap-стили ко всем полям формы."""
+    def __init__(self, *args, user=None, **kwargs):
+        """Добавляет Bootstrap-стили и сохраняет текущего пользователя."""
+        self.user = user
         super().__init__(*args, **kwargs)
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
@@ -55,6 +56,18 @@ class ProductForm(forms.ModelForm):
         if price is not None and price < 0:
             raise forms.ValidationError("Цена не может быть отрицательной.")
         return price
+
+    def clean_is_published(self):
+        """Проверяет право на отмену публикации продукта."""
+        is_published = self.cleaned_data.get("is_published")
+        if (
+            self.instance.pk
+            and self.instance.is_published
+            and not is_published
+            and not (self.user and self.user.has_perm("catalog.can_unpublish_product"))
+        ):
+            raise forms.ValidationError("У вас нет прав на отмену публикации продукта.")
+        return is_published
 
     def clean_image(self):
         """Проверяет формат и размер загружаемого изображения."""
