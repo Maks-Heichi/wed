@@ -26,7 +26,12 @@ SECRET_KEY = "django-insecure-bcrv!zj@h=6pdpk4@@yiau8x)%j72wcl)@a-+tcgx5wy=@1q)@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+]
 
 # Application definition
 
@@ -37,7 +42,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "users",
     "catalog",
+    "blog",
 ]
 
 MIDDLEWARE = [
@@ -128,3 +135,30 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = "users.User"
+
+LOGIN_URL = "users:login"
+LOGIN_REDIRECT_URL = "catalog:home"
+LOGOUT_REDIRECT_URL = "catalog:home"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.yandex.ru"
+EMAIL_PORT = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+FORBIDDEN_WORDS = (
+    "казино",
+    "криптовалюта",
+    "крипта",
+    "биржа",
+    "дешево",
+    "бесплатно",
+    "обман",
+    "полиция",
+    "радар",
+)

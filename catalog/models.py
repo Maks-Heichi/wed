@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -38,6 +39,18 @@ class Product(models.Model):
         decimal_places=2,
         verbose_name="Цена за покупку",
     )
+    is_published = models.BooleanField(
+        default=False,
+        verbose_name="Опубликован",
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="products",
+        verbose_name="Владелец",
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Дата создания",
@@ -50,6 +63,9 @@ class Product(models.Model):
     class Meta:
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"
+        permissions = [
+            ("can_unpublish_product", "Может отменять публикацию продукта"),
+        ]
 
     def __str__(self) -> str:
         """Возвращает наименование продукта."""
