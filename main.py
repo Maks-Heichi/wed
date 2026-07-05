@@ -15,7 +15,7 @@ _SECTION_MARKERS = re.compile(r"<!--\s*section:(?P<name>\w+)\s*-->")
 
 
 def read_pages_raw() -> str:
-    """Читает pages.html целиком (with open)."""
+    """Читает `pages.html` целиком."""
     with open(PAGES_FILE, encoding="utf-8") as file:
         return file.read()
 
@@ -125,7 +125,7 @@ class ContactsHandler(BaseHTTPRequestHandler):
         self._send_page(section)
 
     def do_HEAD(self) -> None:
-        """HEAD-версия do_GET без тела ответа."""
+        """Версия `do_GET` для `HEAD` без тела ответа."""
         section = self._resolve_route_section()
         if section is None:
             self.send_error(404)
