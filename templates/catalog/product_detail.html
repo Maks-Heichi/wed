@@ -22,7 +22,9 @@
         </div>
         <div class="col-md-7">
             <h1 class="display-5">{{ product.name }}</h1>
-            <p class="lead text-muted">{{ product.category.name }}</p>
+            <p class="lead text-muted">
+                <a href="{% url 'catalog:category_products' product.category.pk %}">{{ product.category.name }}</a>
+            </p>
             {% if product.is_published %}
             <span class="badge bg-success mb-2">Опубликован</span>
             {% else %}

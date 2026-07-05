@@ -162,3 +162,13 @@ FORBIDDEN_WORDS = (
     "полиция",
     "радар",
 )
+
+CACHE_TTL_PRODUCT_DETAIL = 60 * 15
+CACHE_TTL_CATEGORY_PRODUCTS = 60 * 60
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+    }
+}

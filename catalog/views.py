@@ -14,8 +14,9 @@ from django.views.generic import (
 )
 
 from catalog.forms import ContactForm, ProductForm
-from catalog.models import Product
+from catalog.models import Category, Product
 from catalog.permissions import user_can_edit_product
+from catalog.services import get_products_by_category
 
 
 class ProductOwnerOrModeratorMixin(UserPassesTestMixin):
@@ -37,6 +38,28 @@ class ProductListView(ListView):
     def get_queryset(self):
         """Возвращает только опубликованные товары."""
         return Product.objects.filter(is_published=True)
+
+
+class CategoryProductListView(ListView):
+    """Отображает список опубликованных товаров выбранной категории."""
+
+    template_name = "catalog/category_products.html"
+    context_object_name = "products"
+
+    def get_category(self) -> Category:
+        """Возвращает категорию по id из URL."""
+        return get_object_or_404(Category, pk=self.kwargs["category_id"])
+
+    def get_queryset(self):
+        """Возвращает продукты категории через сервис с кешированием."""
+        category = self.get_category()
+        return get_products_by_category(category_id=category.pk)
+
+    def get_context_data(self, **kwargs):
+        """Добавляет объект категории в контекст шаблона."""
+        context = super().get_context_data(**kwargs)
+        context["category"] = self.get_category()
+        return context
 
 
 class ProductDetailView(LoginRequiredMixin, DetailView):
